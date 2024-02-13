@@ -1,7 +1,7 @@
 //-------------------------------------------------------
 //   Cable Tester Code for the DUNE Experiment
 //            created by: Ross Stauder
-//                   rev 2023
+//                   rev 2024
 //-------------------------------------------------------
 //
 //PINOUT: (For ATMEGA)
@@ -22,8 +22,9 @@
 // See PCB Documentation for more info
 //--------------------------------------------------------
 
+#define button_pin 2
 
-bool buttonPress = false;
+//bool buttonPress = false;
 int cable = 0;
 unsigned int input;
 unsigned int output;
@@ -39,12 +40,14 @@ void setup() {
   DDRA = 0b11111111; //set pin 22-29 to output
   DDRC = 0b11111111; //set pin 30-33 to output
   
-  attachInterrupt(digitalPinToInterrupt(2), buttonPressed, RISING);
+  //attachInterrupt(digitalPinToInterrupt(2), buttonPressed, RISING);
   Serial.begin(9600);
 }
 void loop() {
   // -----Main Data Stream
-  if(buttonPress){
+  if(digitalRead(button_pin)){
+    //wait for button to debounce
+    delay(100);
     digitalWrite(greenLED, LOW);
     digitalWrite(redLED, LOW);
     //set up inputs
@@ -60,7 +63,7 @@ void loop() {
       delay(100);
       //recieve the current outputs as a 12-bit unsigned int
       output = grabOutput();
-      for(int j=0;j<100;j++){
+      for(int j=0;j<1000;j++){
         if(grabOutput() != output){
           output = grabOutput();
           Serial.println("Output Unstable");    //verify that the output is stable
@@ -116,18 +119,20 @@ void loop() {
       digitalWrite(redLED, HIGH);
     }
     //avoid infinite loop
-    buttonPress = false;
+    //buttonPress = false;
+    delay(500);
   }
   //button hasn't been pressed
+  delay(500);
 }
 
 //---------HELPER METHODS----------
 
 //ISR attached to the button input pin
-void buttonPressed(){
+//void buttonPressed(){
   //Serial.println("button pressed");
-  buttonPress = true;
-}
+  //buttonPress = true;
+//}
 //Translates a 12bit input into 2 seperate ports
 void updatePort(int input){
   unsigned int A = input | 0b00000000;
